@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { Home, ShoppingCart, User, LogOut } from "lucide-react";
+import { Home, User } from "lucide-react";
 import { useNotification } from "./Notification";
 
 export default function Header() {
@@ -13,7 +13,7 @@ export default function Header() {
     try {
       await signOut();
       showNotification("Signed out successfully", "success");
-    } catch (error) {
+    } catch {
       showNotification("Failed to sign out", "error");
     }
   };
@@ -34,35 +34,6 @@ export default function Header() {
         </div>
         <div className="flex flex-1 justify-end px-2">
           <div className="flex items-stretch gap-2">
-            <div className="dropdown dropdown-end">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-circle"
-              >
-                <div className="indicator">
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="badge badge-sm badge-primary indicator-item">
-                    0
-                  </span>
-                </div>
-              </div>
-              <div
-                tabIndex={0}
-                className="dropdown-content z-[1] shadow-lg bg-base-100 rounded-box w-64 mt-4"
-              >
-                <div className="p-3">
-                  <p className="font-medium">Cart Empty</p>
-                  <p className="text-sm text-base-content/70 mt-1">
-                    Subtotal: $0.00
-                  </p>
-                  <button className="btn btn-primary btn-sm w-full mt-3">
-                    View Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-
             <div className="dropdown dropdown-end">
               <div
                 tabIndex={0}
@@ -99,6 +70,14 @@ export default function Header() {
                         </Link>
                       </li>
                     )}
+                    <li>
+                      <Link
+                        href="/orders"
+                        className="px-4 py-2 hover:bg-base-200 block w-full"
+                      >
+                        My Orders
+                      </Link>
+                    </li>
                     <li>
                       <button
                         onClick={handleSignOut}

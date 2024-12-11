@@ -7,19 +7,7 @@ import { IKUploadResponse } from "imagekitio-next/dist/types/components/IKUpload
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useNotification } from "./Notification";
 import { IMAGE_VARIANTS, ImageVariantType } from "@/models/Product";
-
-interface ProductFormData {
-  name: string;
-  description: string;
-  imageUrl: string;
-  variants: {
-    type: "square" | "wide" | "portrait";
-    price: number;
-    license: "personal" | "commercial";
-  }[];
-}
-
-type AspectRatio = "1:1" | "16:9" | "4:3";
+import { apiClient, ProductFormData } from "@/lib/api-client";
 
 export default function AdminProductForm() {
   const [loading, setLoading] = useState(false);
@@ -38,7 +26,7 @@ export default function AdminProductForm() {
       imageUrl: "",
       variants: [
         {
-          type: "square",
+          type: "SQUARE" as ImageVariantType,
           price: 9.99,
           license: "personal",
         },
@@ -59,13 +47,7 @@ export default function AdminProductForm() {
   const onSubmit = async (data: ProductFormData) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) throw new Error(await response.text());
+      await apiClient.createProduct(data);
       showNotification("Product created successfully!", "success");
 
       // Reset form after successful submission
@@ -74,7 +56,7 @@ export default function AdminProductForm() {
       setValue("imageUrl", "");
       setValue("variants", [
         {
-          type: "square",
+          type: "SQUARE" as ImageVariantType,
           price: 9.99,
           license: "personal",
         },
@@ -193,7 +175,7 @@ export default function AdminProductForm() {
         className="btn btn-outline btn-block"
         onClick={() =>
           append({
-            type: "square",
+            type: "SQUARE" as ImageVariantType,
             price: 9.99,
             license: "personal",
           })

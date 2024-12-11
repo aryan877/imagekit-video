@@ -8,9 +8,11 @@ import {
   ImageVariantType,
 } from "@/models/Product";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Loader2, AlertCircle, Check, Image as ImageIcon } from "lucide-react";
 import { useNotification } from "@/app/components/Notification";
+import { useSession } from "next-auth/react";
+import { apiClient } from "@/lib/api-client";
 
 export default function ProductPage() {
   const params = useParams();
@@ -21,6 +23,8 @@ export default function ProductPage() {
     null
   );
   const { showNotification } = useNotification();
+  const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -33,17 +37,7 @@ export default function ProductPage() {
       }
 
       try {
-        const res = await fetch(`/api/products/${id}`, {
-          next: { revalidate: 60 },
-        });
-
-        if (!res.ok) {
-          throw new Error(
-            res.status === 404 ? "Product not found" : "Failed to fetch product"
-          );
-        }
-
-        const data = await res.json();
+        const data = await apiClient.getProduct(id.toString());
         setProduct(data);
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -56,31 +50,60 @@ export default function ProductPage() {
     fetchProduct();
   }, [params?.id]);
 
-  const handlePurchase = (variant: ImageVariant) => {
-    showNotification(`Processing purchase for ${variant.type} version`, "info");
-  };
-
-  const getTransformation = (variantType: ImageVariantType | "SQUARE") => {
-    const variantKey = variantType.toUpperCase() as keyof typeof IMAGE_VARIANTS;
-    const variant = IMAGE_VARIANTS[variantKey];
-
-    if (!variant) {
-      return [
-        {
-          width: IMAGE_VARIANTS.SQUARE.dimensions.width.toString(),
-          height: IMAGE_VARIANTS.SQUARE.dimensions.height.toString(),
-          cropMode: "extract",
-          focus: "center",
-        },
-      ];
+  const handlePurchase = async (variant: ImageVariant) => {
+    if (!session) {
+      showNotification("Please login to make a purchase", "error");
+      router.push("/login");
+      return;
     }
 
+    if (!product?._id) {
+      showNotification("Invalid product", "error");
+      return;
+    }
+
+    try {
+      const { orderId, amount } = await apiClient.createOrder({
+        productId: product._id,
+        variant,
+      });
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount,
+        currency: "USD",
+        name: "ImageKit Shop",
+        description: `${product.name} - ${variant.type} Version`,
+        order_id: orderId,
+        handler: function () {
+          showNotification("Payment successful!", "success");
+          router.push("/orders");
+        },
+        prefill: {
+          email: session.user.email,
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        error instanceof Error ? error.message : "Payment failed",
+        "error"
+      );
+    }
+  };
+
+  const getTransformation = (variantType: ImageVariantType) => {
+    const variant = IMAGE_VARIANTS[variantType];
     return [
       {
         width: variant.dimensions.width.toString(),
         height: variant.dimensions.height.toString(),
         cropMode: "extract",
         focus: "center",
+        quality: "60",
       },
     ];
   };
@@ -109,19 +132,14 @@ export default function ProductPage() {
             className="relative rounded-lg overflow-hidden"
             style={{
               aspectRatio: selectedVariant
-                ? `${
-                    IMAGE_VARIANTS[
-                      selectedVariant.type.toUpperCase() as keyof typeof IMAGE_VARIANTS
-                    ].dimensions.width
-                  } / ${
-                    IMAGE_VARIANTS[
-                      selectedVariant.type.toUpperCase() as keyof typeof IMAGE_VARIANTS
-                    ].dimensions.height
+                ? `${IMAGE_VARIANTS[selectedVariant.type].dimensions.width} / ${
+                    IMAGE_VARIANTS[selectedVariant.type].dimensions.height
                   }`
                 : "1 / 1",
             }}
           >
             <IKImage
+              urlEndpoint={process.env.NEXT_PUBLIC_URL_ENDPOINT}
               path={product.imageUrl}
               alt={product.name}
               transformation={
@@ -137,19 +155,8 @@ export default function ProductPage() {
           {/* Image Dimensions Info */}
           {selectedVariant && (
             <div className="text-sm text-center text-base-content/70">
-              Preview:{" "}
-              {
-                IMAGE_VARIANTS[
-                  selectedVariant.type.toUpperCase() as keyof typeof IMAGE_VARIANTS
-                ].dimensions.width
-              }{" "}
-              x{" "}
-              {
-                IMAGE_VARIANTS[
-                  selectedVariant.type.toUpperCase() as keyof typeof IMAGE_VARIANTS
-                ].dimensions.height
-              }
-              px
+              Preview: {IMAGE_VARIANTS[selectedVariant.type].dimensions.width} x{" "}
+              {IMAGE_VARIANTS[selectedVariant.type].dimensions.height}px
             </div>
           )}
         </div>

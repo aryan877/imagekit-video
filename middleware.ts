@@ -2,13 +2,18 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  function middleware(req) {
+  function middleware() {
     return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
+
+        // Allow webhook endpoint
+        if (pathname.startsWith("/api/webhook")) {
+          return true;
+        }
 
         // Allow auth-related routes
         if (

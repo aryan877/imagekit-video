@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import ImageGallery from "./components/ImageGallery";
 import { IProduct } from "@/models/Product";
+import { apiClient } from "@/lib/api-client";
 
 export default function Home() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -10,9 +11,7 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("/api/products");
-        if (!response.ok) throw new Error("Failed to fetch products");
-        const data = await response.json();
+        const data = await apiClient.getProducts();
         setProducts(data);
       } catch (error) {
         console.error("Error fetching products:", error);
