@@ -1,8 +1,8 @@
 import { IOrder } from "@/models/Order";
-import { IProduct, ImageVariant, ImageVariantType } from "@/models/Product";
+import { IProduct, ImageVariant } from "@/models/Product";
 import { Types } from "mongoose";
 
-export interface ProductFormData extends Omit<IProduct, "_id"> {}
+export type ProductFormData = Omit<IProduct, "_id">;
 
 export interface CreateOrderData {
   productId: Types.ObjectId | string;

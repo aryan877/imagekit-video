@@ -4,10 +4,10 @@ import Product from "@/models/Product";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id } = await props.params;
     await connectToDatabase();
     const product = await Product.findById(id).lean();
 
