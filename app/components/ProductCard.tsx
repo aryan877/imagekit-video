@@ -12,20 +12,32 @@ export default function ProductCard({ product }: { product: IProduct }) {
   return (
     <div className="card bg-base-100 shadow hover:shadow-lg transition-all duration-300">
       <figure className="relative px-4 pt-4">
-        <Link href={`/products/${product._id}`} className="relative group">
-          <div className="rounded-xl overflow-hidden">
+        <Link
+          href={`/products/${product._id}`}
+          className="relative group w-full"
+        >
+          <div
+            className="rounded-xl overflow-hidden relative w-full"
+            style={{
+              aspectRatio:
+                IMAGE_VARIANTS.SQUARE.dimensions.width /
+                IMAGE_VARIANTS.SQUARE.dimensions.height,
+            }}
+          >
             <IKImage
               path={product.imageUrl}
               alt={product.name}
-              loading="lazy"
-              lqip={{ active: true, quality: 20 }}
+              loading="eager"
               transformation={[
                 {
-                  width: IMAGE_VARIANTS.SQUARE.dimensions.width.toString(),
                   height: IMAGE_VARIANTS.SQUARE.dimensions.height.toString(),
+                  width: IMAGE_VARIANTS.SQUARE.dimensions.width.toString(),
+                  cropMode: "extract",
+                  focus: "center",
+                  quality: "80",
                 },
               ]}
-              className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </div>
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 rounded-xl" />
