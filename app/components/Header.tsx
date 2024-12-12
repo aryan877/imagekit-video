@@ -26,10 +26,12 @@ export default function Header() {
             href="/"
             className="btn btn-ghost text-xl gap-2 normal-case font-bold"
             prefetch={true}
-            onClick={() => showNotification("Welcome to ImageKit Shop", "info")}
+            onClick={() =>
+              showNotification("Welcome to ImageKit ReelsPro", "info")
+            }
           >
             <Home className="w-5 h-5" />
-            ImageKit Shop
+            ImageKit ReelsPro
           </Link>
         </div>
         <div className="flex flex-1 justify-end px-2">
@@ -54,30 +56,19 @@ export default function Header() {
                       </span>
                     </li>
                     <div className="divider my-1"></div>
-                    {session.user?.role === "admin" && (
-                      <li>
-                        <Link
-                          href="/admin"
-                          className="px-4 py-2 hover:bg-base-200 block w-full"
-                          onClick={() =>
-                            showNotification(
-                              "Welcome to Admin Dashboard",
-                              "info"
-                            )
-                          }
-                        >
-                          Admin Dashboard
-                        </Link>
-                      </li>
-                    )}
+
                     <li>
                       <Link
-                        href="/orders"
+                        href="/upload"
                         className="px-4 py-2 hover:bg-base-200 block w-full"
+                        onClick={() =>
+                          showNotification("Welcome to Admin Dashboard", "info")
+                        }
                       >
-                        My Orders
+                        Video Upload
                       </Link>
                     </li>
+
                     <li>
                       <button
                         onClick={handleSignOut}

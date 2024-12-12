@@ -1,13 +1,6 @@
-import { IOrder } from "@/models/Order";
-import { IProduct, ImageVariant } from "@/models/Product";
-import { Types } from "mongoose";
+import { IVideo } from "@/models/Video";
 
-export type ProductFormData = Omit<IProduct, "_id">;
-
-export interface CreateOrderData {
-  productId: Types.ObjectId | string;
-  variant: ImageVariant;
-}
+export type VideoFormData = Omit<IVideo, "_id">;
 
 type FetchOptions = {
   method?: "GET" | "POST" | "PUT" | "DELETE";
@@ -40,34 +33,18 @@ class ApiClient {
     return response.json();
   }
 
-  async getProducts() {
-    return this.fetch<IProduct[]>("/products");
+  async getVideos() {
+    return this.fetch<IVideo[]>("/videos");
   }
 
-  async getProduct(id: string) {
-    return this.fetch<IProduct>(`/products/${id}`);
+  async getVideo(id: string) {
+    return this.fetch<IVideo>(`/videos/${id}`);
   }
 
-  async createProduct(productData: ProductFormData) {
-    return this.fetch<IProduct>("/products", {
+  async createVideo(videoData: VideoFormData) {
+    return this.fetch<IVideo>("/videos", {
       method: "POST",
-      body: productData,
-    });
-  }
-
-  async getUserOrders() {
-    return this.fetch<IOrder[]>("/orders/user");
-  }
-
-  async createOrder(orderData: CreateOrderData) {
-    const sanitizedOrderData = {
-      ...orderData,
-      productId: orderData.productId.toString(),
-    };
-
-    return this.fetch<{ orderId: string; amount: number }>("/orders", {
-      method: "POST",
-      body: sanitizedOrderData,
+      body: videoData,
     });
   }
 }
