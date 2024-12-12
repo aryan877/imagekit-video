@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
     await User.create({
       email,
       password,
-      role: "user", // Default role
     });
 
     return NextResponse.json(
